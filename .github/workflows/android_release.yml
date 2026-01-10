@@ -35,13 +35,11 @@ jobs:
         run: chmod +x gen.sh build.sh
 
       - name: Create Dummy Configs
-        # Bypasses the build.sh checks for API keys and Firebase files
         run: |
-          # Create dummy .env
-          echo "REVENUECAT_GOOGLE_API_KEY=dummy_key" > .env
-          echo "REVENUECAT_APPLE_API_KEY=dummy_key" >> .env
-          
-          # Create dummy google-services.json (needed for prod flavor)
+          echo "REVENUECAT_GOOGLE_API_KEY=dummy" > .env
+          echo "REVENUECAT_APPLE_API_KEY=dummy" >> .env
+          mkdir -p env
+          echo '{"api_url": "dummy"}' > env/prod.json
           mkdir -p android/app/src/prod
           echo '{"project_info":{"project_number":"1","project_id":"d","storage_bucket":"d"},"client":[{"client_info":{"mobilesdk_app_id":"1:1:android:1","android_client_info":{"package_name":"com.khoadng.boorusama"}},"api_key":[{"current_key":"d"}],"services":{"appinvite_service":{"status":1}}}]}' > android/app/src/prod/google-services.json
 
@@ -51,19 +49,18 @@ jobs:
       - name: Build Production APK
         run: ./build.sh apk --flavor prod
 
-      - name: Create Release and Upload APK
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
-        with:
-          files: |
-            build/app/outputs/flutter-apk/app-prod-release.apk
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload Artifact (for manual runs)
+      - name: Upload Artifact (Manual Run)
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
           name: Boorusama-Plus-APK
-          path: build/app/outputs/flutter-apk/app-prod-release.apk
+          # Using wildcard to catch both signed and unsigned versions
+          path: build/app/outputs/flutter-apk/app-prod-*.apk
+
+      - name: Create Release and Upload
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: build/app/outputs/flutter-apk/app-prod-*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
