@@ -1,12 +1,11 @@
 name: Build and Release Android APK
 
 on:
-  workflow_dispatch: # Allows manual trigger
+  workflow_dispatch:
   push:
     tags:
-      - 'v*' # Automatically runs and creates a release when you push a tag (e.g. v1.0.0)
+      - 'v*'
 
-# Needed to allow the action to create a Release and upload files
 permissions:
   contents: write
 
@@ -26,7 +25,8 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'
+          # Updated to match the project's minimum requirement
+          flutter-version: '3.35.0' 
           channel: 'stable'
           cache: true
 
@@ -37,16 +37,13 @@ jobs:
         run: chmod +x gen.sh build.sh
 
       - name: Run code generation
-        # This is required for Boorusama to generate JSON/Icon code
         run: ./gen.sh
 
       - name: Build Production APK
-        # Boorusama's build.sh correctly handles flavors
         run: ./build.sh apk --flavor prod
 
       - name: Create Release and Upload APK
         uses: softprops/action-gh-release@v1
-        # This part runs ONLY if you pushed a tag (e.g., v4.2.0)
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
@@ -56,7 +53,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload Artifact (for manual runs)
-        # This part runs when you click "Run Workflow" manually
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
