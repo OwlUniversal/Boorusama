@@ -34,11 +34,16 @@ jobs:
       - name: Make scripts executable
         run: chmod +x gen.sh build.sh
 
-      - name: Create Dummy .env file
-        # This bypasses the build script's safety check
+      - name: Create Dummy Configs
+        # Bypasses the build.sh checks for API keys and Firebase files
         run: |
-          echo "REVENUECAT_GOOGLE_API_KEY=unlocked_dummy_key" > .env
-          echo "REVENUECAT_APPLE_API_KEY=unlocked_dummy_key" >> .env
+          # Create dummy .env
+          echo "REVENUECAT_GOOGLE_API_KEY=dummy_key" > .env
+          echo "REVENUECAT_APPLE_API_KEY=dummy_key" >> .env
+          
+          # Create dummy google-services.json (needed for prod flavor)
+          mkdir -p android/app/src/prod
+          echo '{"project_info":{"project_number":"1","project_id":"d","storage_bucket":"d"},"client":[{"client_info":{"mobilesdk_app_id":"1:1:android:1","android_client_info":{"package_name":"com.khoadng.boorusama"}},"api_key":[{"current_key":"d"}],"services":{"appinvite_service":{"status":1}}}]}' > android/app/src/prod/google-services.json
 
       - name: Run code generation
         run: ./gen.sh --delete-conflicting-outputs
