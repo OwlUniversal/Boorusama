@@ -25,8 +25,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          # Updated to match the project's minimum requirement
-          flutter-version: '3.35.0' 
+          # This will automatically pull the newest stable (e.g., 3.35.6 or higher)
           channel: 'stable'
           cache: true
 
@@ -37,7 +36,8 @@ jobs:
         run: chmod +x gen.sh build.sh
 
       - name: Run code generation
-        run: ./gen.sh
+        # Adding the delete flag just in case there are generation conflicts
+        run: ./gen.sh --delete-conflicting-outputs
 
       - name: Build Production APK
         run: ./build.sh apk --flavor prod
