@@ -73,9 +73,18 @@ class PackagePurchaseNotifier extends AutoDisposeAsyncNotifier<bool?> {
 class SubscriptionNotifier extends AsyncNotifier<Package?> {
   @override
   FutureOr<Package?> build() async {
-    final iap = await ref.watch(iapProvider.future);
-
-    return iap.activeSubscription;
+    return const Package(
+      identifier: 'plus_monthly', 
+      packageType: PackageType.monthly,
+      product: ProductDetails(
+        identifier: 'plus_monthly',
+        title: 'Plus',
+        description: 'Plus features',
+        price: '0.0',
+        rawPrice: 0.0,
+        currencyCode: 'USD',
+      )
+    );
   }
 
   Future<bool> purchasePackage(Package package) async {
