@@ -10,6 +10,7 @@ final iapFuncProvider = Provider<Future<IAP> Function()?>((ref) => null);
 
 final iapProvider = FutureProvider<IAP>((ref) async {
   final iapFunc = ref.watch(iapFuncProvider);
+  // This will now use our Unlocked Dummy IAP
   final iap = iapFunc != null ? await iapFunc() : await initDummyIap();
 
   return iap;
@@ -31,11 +32,27 @@ Future<List<Package>?> getActiveSubscriptionPackages(
   return packages;
 }
 
+/// MODIFIED: This now returns an IAP instance that is already "Plus"
 Future<IAP> initDummyIap() async {
-  final iap = DummyIAP.create();
-  await iap.init();
+  const activePackage = Package(
+    id: 'monthly_subscription',
+    product: ProductDetails(
+      id: 'monthly_subscription',
+      title: 'Plus Unlocked',
+      description: 'Enjoy your features',
+      price: r'$0.00',
+      rawPrice: 0.0,
+      currencyCode: 'USD',
+    ),
+    type: PackageType.monthly,
+  );
 
-  return iap;
+  // We use DefaultIAP from your iap_impl.dart and force the activeSubscription
+  return DefaultIAP(
+    purchaser: DummyPurchaser(packages: [activePackage]),
+    subscriptionManager: const DefaultSubscriptionManager(),
+    activeSubscription: activePackage, // This tells the UI we are Plus
+  );
 }
 
 final subscriptionPackagesProvider = FutureProvider.autoDispose<List<Package>>((
@@ -50,7 +67,6 @@ final subscriptionPackagesProvider = FutureProvider.autoDispose<List<Package>>((
       if (a.type == PackageType.annual) {
         return -1;
       }
-
       return 1;
     });
 
