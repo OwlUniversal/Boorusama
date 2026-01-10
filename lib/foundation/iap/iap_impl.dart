@@ -4,6 +4,38 @@ import 'providers.dart';
 import 'purchaser.dart';
 import 'subscription.dart';
 
+class DefaultSubscriptionManager implements SubscriptionManager {
+  const DefaultSubscriptionManager();
+
+  static const _kDefaultPackage = Package(
+    id: 'monthly_subscription',
+    product: ProductDetails(
+      id: 'monthly_subscription',
+      title: '1 month',
+      description: '',
+      price: r'$3.99',
+      rawPrice: 3.99,
+      currencyCode: 'USD',
+    ),
+    type: PackageType.monthly,
+  );
+
+  @override
+  Future<bool> hasActiveSubscription(String id) async {
+    final list = await getActiveSubscriptions();
+    return list.any((p) => p.id == id);
+  }
+
+  @override
+  Future<String?> get managementURL async => null;
+
+  @override
+  Future<List<Package>> getActiveSubscriptions() async {
+    // Return a list containing one default package to indicate active Plus status.
+    return [_kDefaultPackage];
+  }
+}
+
 class DefaultIAP implements IAP {
   DefaultIAP({
     required this.purchaser,
