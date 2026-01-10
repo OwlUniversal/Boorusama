@@ -1,5 +1,5 @@
 // Project imports:
-import 'dummy.dart';
+// import 'dummy.dart'; // REMOVED to prevent errors
 import 'providers.dart';
 import 'purchaser.dart';
 import 'subscription.dart';
@@ -12,26 +12,22 @@ class DefaultSubscriptionManager implements SubscriptionManager {
     product: ProductDetails(
       id: 'monthly_subscription',
       title: '1 month',
-      description: '',
-      price: r'$3.99',
-      rawPrice: 3.99,
+      description: 'Plus Unlocked',
+      price: r'$0.00',
+      rawPrice: 0.0,
       currencyCode: 'USD',
     ),
     type: PackageType.monthly,
   );
 
   @override
-  Future<bool> hasActiveSubscription(String id) async {
-    final list = await getActiveSubscriptions();
-    return list.any((p) => p.id == id);
-  }
+  Future<bool> hasActiveSubscription(String id) async => true; // FORCE UNLOCK
 
   @override
   Future<String?> get managementURL async => null;
 
   @override
   Future<List<Package>> getActiveSubscriptions() async {
-    // Return a list containing one default package to indicate active Plus status.
     return [_kDefaultPackage];
   }
 }
@@ -64,9 +60,8 @@ class DummyIAP implements IAP {
       packages: _kPackages,
     );
 
-    final subscriptionManager = DummySubscriptionManager(
-      iap: iap,
-    );
+    // Use our unlocked manager instead of the missing DummySubscriptionManager
+    final subscriptionManager = const DefaultSubscriptionManager();
 
     return DummyIAP._(
       purchaser: iap,
@@ -121,4 +116,19 @@ class DummyIAP implements IAP {
       type: PackageType.monthly,
     ),
   ];
+}
+
+// DEFINED HERE TO FIX "NOT FOUND" ERRORS
+class DummyPurchaser implements Purchaser {
+  final List<Package> packages;
+  DummyPurchaser({required this.packages});
+
+  @override
+  Future<List<Package>> getAvailablePackages() async => packages;
+
+  @override
+  Future<bool> purchasePackage(Package package) async => true;
+
+  @override
+  Future<void> restorePurchases() async {}
 }
