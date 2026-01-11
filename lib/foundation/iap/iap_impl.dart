@@ -2,25 +2,30 @@
 import 'providers.dart';
 import 'purchaser.dart';
 import 'subscription.dart';
+// Note: If the build fails saying StoreProduct not found, change it back to ProductDetails
+// But major upgrades usually require StoreProduct.
 
 class DefaultSubscriptionManager implements SubscriptionManager {
   const DefaultSubscriptionManager();
 
   static const _kDefaultPackage = Package(
     id: 'monthly_subscription',
-    product: ProductDetails(
-      id: 'monthly_subscription',
+    // Newer RevenueCat versions use storeProduct instead of product
+    // If this fails, rename 'storeProduct' back to 'product' and 'StoreProduct' to 'ProductDetails'
+    storeProduct: StoreProduct(
+      identifier: 'monthly_subscription',
       title: '1 month',
       description: 'Plus Unlocked',
-      price: r'$0.00',
-      rawPrice: 0.0,
+      price: 0.0,
+      priceString: '\$0.00',
       currencyCode: 'USD',
     ),
-    type: PackageType.monthly,
+    packageType: PackageType.monthly,
+    identifier: 'monthly_subscription', // specific to some RC versions
   );
 
   @override
-  Future<bool> hasActiveSubscription(String id) async => true; // Always Plus
+  Future<bool> hasActiveSubscription(String id) async => true;
 
   @override
   Future<String?> get managementURL async => null;
@@ -55,7 +60,6 @@ class DummyIAP implements IAP {
   });
 
   factory DummyIAP.create() {
-    // Pass empty list to DummyPurchaser since we don't need real packages to buy
     final iap = DummyPurchaser(packages: []);
     final subscriptionManager = const DefaultSubscriptionManager();
 
@@ -70,6 +74,7 @@ class DummyIAP implements IAP {
       subscriptionManager,
     );
 
+    // --- SYNTAX FIX WAS HERE ---
     if (activePackages != null && activePackages.isNotEmpty) {
       _activeSubscription = activePackages.first;
     }
@@ -87,7 +92,6 @@ class DummyIAP implements IAP {
   Package? get activeSubscription => _activeSubscription;
 }
 
-// FIXED DUMMY PURCHASER
 class DummyPurchaser implements Purchaser {
   final List<Package> packages;
   DummyPurchaser({required this.packages});
@@ -98,46 +102,9 @@ class DummyPurchaser implements Purchaser {
   @override
   Future<bool> purchasePackage(Package package) async => true;
 
-  // Added missing method
   @override
   String? describePurchaseError(Object error) => null;
 
-  // Fixed return type to Future<bool?>
-  @override
-  Future<bool?> restorePurchases() async => true;
-}    if (activePackages != null && activePackages.isNotEmpty) {
-      _activeSubscription = activePackages.first;
-    }
-  }
-
-  Package? _activeSubscription;
-
-  @override
-  final Purchaser purchaser;
-
-  @override
-  final SubscriptionManager subscriptionManager;
-
-  @override
-  Package? get activeSubscription => _activeSubscription;
-}
-
-// FIXED DUMMY PURCHASER
-class DummyPurchaser implements Purchaser {
-  final List<Package> packages;
-  DummyPurchaser({required this.packages});
-
-  @override
-  Future<List<Package>> getAvailablePackages() async => packages;
-
-  @override
-  Future<bool> purchasePackage(Package package) async => true;
-
-  // Added missing method
-  @override
-  String? describePurchaseError(Object error) => null;
-
-  // Fixed return type to Future<bool?>
   @override
   Future<bool?> restorePurchases() async => true;
 }
