@@ -12,11 +12,11 @@ class DefaultSubscriptionManager implements SubscriptionManager {
       id: 'monthly_subscription',
       title: '1 month',
       description: 'Plus Unlocked',
-      price: 0.0,
-      rawPrice: 0.0,
+      price: '\$0.00',    // Fixed: Must be String
+      rawPrice: 0.0,      // Fixed: Must be double
       currencyCode: 'USD',
     ),
-    type: PackageType.monthly,
+    type: PackageType.monthly, // Fixed: parameter name is 'type'
   );
 
   @override
@@ -69,7 +69,6 @@ class DummyIAP implements IAP {
       subscriptionManager,
     );
 
-    // FIXED: The extra '}' that was here is gone now
     if (activePackages != null && activePackages.isNotEmpty) {
       _activeSubscription = activePackages.first;
     }
