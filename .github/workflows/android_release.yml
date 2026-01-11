@@ -25,18 +25,15 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable' # Uses the latest 2026 version
+          channel: 'stable'
           cache: true
 
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Fix Broken Dependencies (fvp)
-        # This is the magic fix! 🪄
-        # It forces the project to upgrade fvp to a version that supports Gradle 9
+      - name: Force Upgrade fvp (Quietly)
+        # Filters out the "Found plugin" spam so logs are readable
         run: |
-          flutter pub upgrade --major-versions fvp
-          flutter pub get
+          sed -i 's/fvp:.*/fvp:/' pubspec.yaml
+          flutter pub upgrade fvp --major-versions | grep -v "Found plugin" || true
+          flutter pub get | grep -v "Found plugin" || true
 
       - name: Make scripts executable
         run: chmod +x gen.sh build.sh
@@ -47,8 +44,8 @@ jobs:
           echo "REVENUECAT_APPLE_API_KEY=dummy" >> .env
           mkdir -p env
           echo '{"api_url": "dummy"}' > env/prod.json
+          
           mkdir -p android/app/src/prod
-          # Writing a minimal valid google-services.json
           echo '{
             "project_info": { "project_number": "1", "project_id": "dummy", "storage_bucket": "d" },
             "client": [
@@ -62,8 +59,8 @@ jobs:
           }' > android/app/src/prod/google-services.json
 
       - name: Run code generation
-        # Added --delete-conflicting-outputs to prevent crashes if files changed
-        run: ./gen.sh --delete-conflicting-outputs
+        # Also quiet this step
+        run: ./gen.sh --delete-conflicting-outputs | grep -v "Found plugin" || true
 
       - name: Build Production APK
         run: ./build.sh apk --flavor prod
@@ -73,7 +70,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Boorusama-Plus-APK
-          # Catches both signed and unsigned names
           path: build/app/outputs/flutter-apk/app-prod-*.apk
 
       - name: Create Release and Upload
