@@ -73,16 +73,15 @@ class PackagePurchaseNotifier extends AutoDisposeAsyncNotifier<bool?> {
 class SubscriptionNotifier extends AsyncNotifier<Package?> {
   @override
   FutureOr<Package?> build() async {
-    // FIX: Using 'id' instead of 'identifier' to match updated dependencies
     return const Package(
       id: 'plus_monthly', 
-      packageType: PackageType.monthly,
+      type: PackageType.monthly, // Fixed: 'type' instead of 'packageType'
       product: ProductDetails(
         id: 'plus_monthly',
         title: 'Plus',
         description: 'Plus features',
-        price: '0.0',
-        rawPrice: 0.0,
+        price: '\$0.00',  // Fixed: String
+        rawPrice: 0.0,    // Fixed: double
         currencyCode: 'USD',
       )
     );
