@@ -35,7 +35,7 @@ Future<IAP> initDummyIap() async {
   const activePackage = Package(
     id: 'monthly_subscription',
     product: ProductDetails(
-      id: 'monthly_subscription',
+      id: 'monthly_subscription', // FIX: ensure this is 'id'
       title: 'Plus Unlocked',
       description: 'Enjoy your features',
       price: r'$0.00',
