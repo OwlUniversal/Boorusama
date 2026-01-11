@@ -2,26 +2,21 @@
 import 'providers.dart';
 import 'purchaser.dart';
 import 'subscription.dart';
-// Note: If the build fails saying StoreProduct not found, change it back to ProductDetails
-// But major upgrades usually require StoreProduct.
 
 class DefaultSubscriptionManager implements SubscriptionManager {
   const DefaultSubscriptionManager();
 
   static const _kDefaultPackage = Package(
     id: 'monthly_subscription',
-    // Newer RevenueCat versions use storeProduct instead of product
-    // If this fails, rename 'storeProduct' back to 'product' and 'StoreProduct' to 'ProductDetails'
-    storeProduct: StoreProduct(
-      identifier: 'monthly_subscription',
+    product: ProductDetails(
+      id: 'monthly_subscription',
       title: '1 month',
       description: 'Plus Unlocked',
       price: 0.0,
-      priceString: '\$0.00',
+      rawPrice: 0.0,
       currencyCode: 'USD',
     ),
-    packageType: PackageType.monthly,
-    identifier: 'monthly_subscription', // specific to some RC versions
+    type: PackageType.monthly,
   );
 
   @override
@@ -74,7 +69,7 @@ class DummyIAP implements IAP {
       subscriptionManager,
     );
 
-    // --- SYNTAX FIX WAS HERE ---
+    // FIXED: The extra '}' that was here is gone now
     if (activePackages != null && activePackages.isNotEmpty) {
       _activeSubscription = activePackages.first;
     }
